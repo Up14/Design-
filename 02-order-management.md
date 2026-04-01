@@ -53,7 +53,9 @@ Each order type is a TOOL designed for a specific situation. Using the wrong too
 
 #### Definition
 
-A **Market Order** says: "Execute my order IMMEDIATELY at the best available price. I don't care what the exact price is — just get it done NOW."
+> **Market Order:** An instruction to a broker or exchange to buy or sell a security immediately at the best currently available price. A market order guarantees execution but does not guarantee the execution price. It is the fastest order type and takes liquidity from the order book.
+
+**In simple words:** A Market Order says: "Execute my order IMMEDIATELY at the best available price. I don't care what the exact price is — just get it done NOW."
 
 You are giving up control of PRICE in exchange for guaranteed SPEED.
 
@@ -159,7 +161,9 @@ and bought all 800 at Rs 48 over a few hours.
 
 #### Definition
 
-A **Limit Order** says: "Execute my order ONLY at my specified price OR BETTER. If the market isn't at my price, put my order in the book and WAIT."
+> **Limit Order:** An instruction to buy or sell a security at a specified price or better. A buy limit order will only execute at the limit price or lower; a sell limit order will only execute at the limit price or higher. Limit orders provide price certainty but do not guarantee execution, as the market price may never reach the specified limit.
+
+**In simple words:** A Limit Order says: "Execute my order ONLY at my specified price OR BETTER. If the market isn't at my price, put my order in the book and WAIT."
 
 You are giving up guaranteed SPEED in exchange for control of PRICE.
 
@@ -320,7 +324,9 @@ Without protection, you'd wake up to a Rs 300/share loss. A stop-loss is your in
 
 #### Definition
 
-A **Stop-Loss Order** has two stages:
+> **Stop-Loss Order (Stop Order):** A conditional order that remains dormant until the market price of a security reaches a specified trigger price (the "stop price"), at which point it is automatically converted into a market order and submitted to the exchange for immediate execution. Stop-loss orders are primarily used as a risk management tool to limit potential losses on an existing position.
+
+**In simple words:** A Stop-Loss Order has two stages:
 
 1. **Stage 1 — Sleeping:** The order is NOT in the order book. It's held by the broker, invisible to the market. It has a **trigger price**.
 
@@ -407,7 +413,9 @@ As we saw above, a regular stop-loss becomes a market order when triggered. In a
 
 #### Definition
 
-A **Stop-Limit Order** has TWO prices:
+> **Stop-Limit Order:** A conditional order that combines features of a stop order and a limit order. It specifies two prices: a stop (trigger) price that activates the order, and a limit price that sets the maximum (for buys) or minimum (for sells) acceptable execution price. Unlike a stop-loss order which converts to a market order upon triggering, a stop-limit converts to a limit order, providing price control but not guaranteeing execution.
+
+**In simple words:** A Stop-Limit Order has TWO prices:
 1. **Trigger Price (Stop Price):** When market hits this, the order activates.
 2. **Limit Price:** The worst price you're willing to accept AFTER activation.
 
@@ -598,7 +606,9 @@ An order is not a one-time event. It has a LIFECYCLE — from creation to comple
 
 #### Definition
 
-Sending a brand new instruction to the exchange. This is the first action — without it, nothing else exists.
+> **New Order (Order Entry):** The act of submitting a fresh buy or sell instruction to the exchange for the first time. A new order is assigned a unique order identifier and, upon acceptance, either matches immediately against existing orders in the book or rests in the order book awaiting a counterparty.
+
+**In simple words:** Sending a brand new instruction to the exchange. This is the first action — without it, nothing else exists.
 
 #### What You Specify When Creating an Order
 
@@ -702,7 +712,9 @@ EXPIRED
 
 #### Definition
 
-Changing the details of an existing order that is still OPEN (not yet filled). You can change the **price**, the **quantity**, or **both**.
+> **Order Modification (Amendment):** The act of changing one or more parameters (price, quantity, or both) of an existing open order that has not yet been fully executed. Most exchanges implement modification as an atomic cancel-and-replace operation, which results in the loss of the order's original time priority in the queue.
+
+**In simple words:** Changing the details of an existing order that is still OPEN (not yet filled). You can change the **price**, the **quantity**, or **both**.
 
 #### The Critical Rule: Modifying Resets Your Time Priority
 
@@ -786,7 +798,9 @@ BEFORE:
 
 #### Definition
 
-Removing your order from the book completely. "Never mind, I don't want to buy/sell anymore." After cancellation, the order is gone and has no effect.
+> **Order Cancellation:** The act of withdrawing an open (unfilled or partially filled) order from the exchange's order book before it is fully executed. Upon successful cancellation, the order ceases to exist in the matching engine. Any previously executed partial fills remain valid and irreversible; only the unfilled remainder is cancelled.
+
+**In simple words:** Removing your order from the book completely. "Never mind, I don't want to buy/sell anymore." After cancellation, the order is gone and has no effect.
 
 #### What Happens When You Cancel
 
@@ -910,7 +924,11 @@ DANGER SCENARIO:
 
 ### 3.2 Order = Intention, Trade = Execution
 
-The simplest way to remember:
+> **Order:** An instruction submitted by a market participant to an exchange or broker to buy or sell a specified quantity of a security, optionally at a specified price. An order represents an intent to transact and may or may not result in execution. Orders are mutable (can be modified or cancelled) until fully filled.
+
+> **Trade (Execution / Fill):** The completed transaction that occurs when a buy order is matched with a sell order by the exchange's matching engine. A trade represents an irrevocable transfer of securities and funds between counterparties. Trades generate a unique trade identifier, are recorded in the exchange's trade log, and are subject to settlement and regulatory reporting.
+
+**In simple words:**
 
 ```
 ORDER = What you WANT to happen

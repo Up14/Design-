@@ -44,7 +44,9 @@ There's a GAP between what you want and what the customer wants. In stock market
 
 #### Definition
 
-A **Bid** is a price that a BUYER is offering to pay. "I BID Rs 3,800 for this stock" = "I'm willing to pay Rs 3,800."
+> **Bid:** The highest price that a prospective buyer is willing to pay for a security at a given point in time. The bid represents the demand side of the market.
+
+**In simple words:** A Bid is a price that a BUYER is offering to pay. "I BID Rs 3,800 for this stock" = "I'm willing to pay Rs 3,800."
 
 There are usually MANY buyers at MANY different prices. Together, all these buy prices form the **bid side** of the order book.
 
@@ -75,7 +77,9 @@ If you're a seller and want to sell RIGHT NOW, the best you can get is Rs 3,800 
 
 #### Definition
 
-An **Ask** (also called **Offer**) is a price that a SELLER is willing to accept. "I'm ASKING Rs 3,805 for this stock" = "I want Rs 3,805, pay me that and I'll sell."
+> **Ask (Offer):** The lowest price at which a seller is willing to sell a security at a given point in time. The ask represents the supply side of the market.
+
+**In simple words:** An Ask is a price that a SELLER is willing to accept. "I'm ASKING Rs 3,805 for this stock" = "I want Rs 3,805, pay me that and I'll sell."
 
 There are usually MANY sellers at MANY different prices. Together, all these sell prices form the **ask side** (or **offer side**) of the order book.
 
@@ -106,7 +110,9 @@ If you're a buyer and want to buy RIGHT NOW, the cheapest you can get is Rs 3,80
 
 #### Definition
 
-The **Spread** is the difference between the Best Ask and the Best Bid.
+> **Bid-Ask Spread:** The difference between the best (lowest) ask price and the best (highest) bid price for a security. The spread serves as a measure of market liquidity and represents the transaction cost of immediacy.
+
+**In simple words:** The Spread is the gap between the cheapest seller and the most expensive buyer.
 
 ```
 Spread = Best Ask - Best Bid
@@ -333,7 +339,9 @@ The CLOB was invented to solve ALL of this with a computer.
 
 ### 2.2 Definition
 
-A **Central Limit Order Book (CLOB)** is an electronic system that:
+> **Central Limit Order Book (CLOB):** A transparent, centralized electronic trading system that aggregates all outstanding limit orders for a security, organizes them by price-time priority, and continuously matches compatible buy and sell orders to facilitate trade execution. The CLOB is the primary price discovery mechanism used by most modern securities exchanges worldwide.
+
+**In simple words:** A CLOB is an electronic system that:
 
 1. **Collects** all buy and sell limit orders for a stock
 2. **Organizes** them by price (and within same price, by time)
@@ -667,7 +675,13 @@ When there are HUNDREDS of orders in the book and a new matching order arrives, 
 
 **"Which order gets filled first? And if there isn't enough for everyone, who gets left out?"**
 
-The answer is **Price-Time Priority** — the most common matching algorithm used by exchanges worldwide (including NSE, BSE, NYSE, NASDAQ, LSE, etc.).
+The answer is **Price-Time Priority**:
+
+> **Price-Time Priority:** The standard order matching algorithm used by securities exchanges in which orders are ranked first by price (most aggressive price receives highest priority) and then by time of arrival (earliest order at the same price receives priority). This deterministic sequencing ensures fair and transparent trade execution across all market participants.
+
+**In simple words:** Best price goes first. If same price, whoever came first goes first.
+
+Used by: NSE, BSE, NYSE, NASDAQ, LSE, and most major exchanges worldwide.
 
 ---
 
