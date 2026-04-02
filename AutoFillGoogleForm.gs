@@ -1,11 +1,15 @@
-var FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfbyM94nlVSeUsn3P4J0PtqSWQKWQue_P9CODXQU0z4OJGmKA/formResponse";
+var FORM_SUBMIT_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfbyM94nlVSeUsn3P4J0PtqSWQKWQue_P9CODXQU0z4OJGmKA/formResponse";
+
+// HOW TO GET YOUR FORM ID:
+// 1. Open your Google Form in edit mode
+// 2. Look at the URL: https://docs.google.com/forms/d/XXXXXXXXX/edit
+// 3. Copy the XXXXXXXXX part and paste it below
+var FORM_ID = "PASTE_YOUR_FORM_ID_HERE";
+
 var SLEEP_MS = 300;
 var MAX_RETRIES = 3;
-var TIME_LIMIT_MS = 5 * 60 * 1000; // Stop 1 min before Google's 6-min limit
+var TIME_LIMIT_MS = 5 * 60 * 1000;
 
-/**
- * Fixes CSV hyphens (-) to en-dashes to match Google Form option text exactly.
- */
 function fixValue(val) {
   val = String(val).trim();
   val = val.replace("18-25",                  "18\u201325");
@@ -21,9 +25,6 @@ function fixValue(val) {
   return val;
 }
 
-/**
- * Builds the form payload from a sheet row.
- */
 function buildPayload(row) {
   return {
     "entry.303740390":  fixValue(row[1]),
@@ -82,10 +83,19 @@ function buildPayload(row) {
   };
 }
 
-/**
- * MAIN FUNCTION — Run this. It auto-resumes from where it stopped.
- * Just keep clicking Run until it says "ALL DONE".
- */
+// ============================================================
+// STEP 1: Run this FIRST to delete all old responses
+// ============================================================
+function deleteAllResponses() {
+  var form = FormApp.openById(FORM_ID);
+  form.deleteAllResponses();
+  Logger.log("ALL OLD RESPONSES DELETED from the form.");
+  Logger.log("Now run submitAllResponses to fill fresh data.");
+}
+
+// ============================================================
+// STEP 2: Run this to submit all 600 rows (auto-resumes)
+// ============================================================
 function submitAllResponses() {
   var props = PropertiesService.getScriptProperties();
   var startRow = Number(props.getProperty("LAST_ROW") || 1);
@@ -103,18 +113,16 @@ function submitAllResponses() {
   for (var i = startRow; i < data.length; i++) {
     var row = data[i];
 
-    // Stop if first question (col[1]) is empty
     if (!row[1]) {
       Logger.log("Stopping at empty row " + (i + 1));
       break;
     }
 
-    // Check if we are close to 6-min time limit — save progress and stop
     var elapsed = new Date().getTime() - startTime;
     if (elapsed > TIME_LIMIT_MS) {
       props.setProperty("LAST_ROW", String(i));
       Logger.log("==============================");
-      Logger.log("TIME LIMIT REACHED — pausing at row " + (i + 1));
+      Logger.log("TIME LIMIT — paused at row " + (i + 1));
       Logger.log("Submitted " + successCount + " rows this run.");
       Logger.log("Click RUN again to continue from row " + (i + 1));
       Logger.log("==============================");
@@ -133,7 +141,6 @@ function submitAllResponses() {
     Utilities.sleep(SLEEP_MS);
   }
 
-  // All done — clear saved position
   props.deleteProperty("LAST_ROW");
 
   Logger.log("==============================");
@@ -147,9 +154,6 @@ function submitAllResponses() {
   Logger.log("==============================");
 }
 
-/**
- * Submits a single form response with retry logic.
- */
 function submitWithRetry(payload, rowNum) {
   var options = {
     "method": "post",
@@ -158,7 +162,7 @@ function submitWithRetry(payload, rowNum) {
   };
 
   for (var attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    var response = UrlFetchApp.fetch(FORM_URL, options);
+    var response = UrlFetchApp.fetch(FORM_SUBMIT_URL, options);
     var code = response.getResponseCode();
 
     if (code === 200) {
@@ -174,10 +178,9 @@ function submitWithRetry(payload, rowNum) {
   return false;
 }
 
-/**
- * Test function — submits only row 2 to verify everything works.
- * Run this FIRST before running submitAllResponses.
- */
+// ============================================================
+// OPTIONAL: Test with 1 row first
+// ============================================================
 function testSingleRow() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var data = sheet.getDataRange().getValues();
@@ -189,24 +192,22 @@ function testSingleRow() {
   Logger.log("Q8 (Age):        " + fixValue(row[8]));
   Logger.log("Q11 (Income):    " + fixValue(row[11]));
   Logger.log("BI6 (last col):  " + fixValue(row[53]));
-  Logger.log("==================");
 
   var payload = buildPayload(row);
   var options = { "method": "post", "payload": payload, "muteHttpExceptions": true };
-  var response = UrlFetchApp.fetch(FORM_URL, options);
+  var response = UrlFetchApp.fetch(FORM_SUBMIT_URL, options);
 
-  Logger.log("Test submit HTTP code: " + response.getResponseCode());
   if (response.getResponseCode() === 200) {
-    Logger.log("SUCCESS — check your form responses to verify the data looks correct.");
+    Logger.log("SUCCESS");
   } else {
-    Logger.log("FAILED — check the form URL and entry IDs.");
+    Logger.log("FAILED — HTTP " + response.getResponseCode());
   }
 }
 
-/**
- * Run this to reset progress and start over from row 1.
- */
+// ============================================================
+// OPTIONAL: Reset progress to start over from row 1
+// ============================================================
 function resetProgress() {
   PropertiesService.getScriptProperties().deleteProperty("LAST_ROW");
-  Logger.log("Progress reset. Next run will start from row 2 (first data row).");
+  Logger.log("Progress reset. Next run starts from row 2.");
 }
