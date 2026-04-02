@@ -1,0 +1,148 @@
+var FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfbyM94nlVSeUsn3P4J0PtqSWQKWQue_P9CODXQU0z4OJGmKA/formResponse";
+var SLEEP_MS = 500;
+var MAX_RETRIES = 3;
+
+function fixValue(val) {
+  val = String(val).trim();
+  val = val.replace("18-25",                  "18\u201325");
+  val = val.replace("26-35",                  "26\u201335");
+  val = val.replace("36-45",                  "36\u201345");
+  val = val.replace("46-55",                  "46\u201355");
+  val = val.replace("6 months - 1 year",      "6 months \u2013 1 year");
+  val = val.replace("1 - 2 years",            "1 \u2013 2 years");
+  val = val.replace("₹500-₹1000",             "₹500\u2013₹1000");
+  val = val.replace("₹1000-₹2000",            "₹1000\u2013₹2000");
+  val = val.replace("₹25,000 - ₹50,000",      "₹25,000 \u2013 ₹50,000");
+  val = val.replace("₹50,000 - ₹1,00,000",    "₹50,000 \u2013 ₹1,00,000");
+  return val;
+}
+
+function submitAllResponses() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+
+  var successCount = 0;
+  var failedRows = [];
+
+  Logger.log("Total rows found: " + (data.length - 1));
+
+  // Row 0 = headers, data starts at index 1
+  // col[0] = Timestamp — SKIP IT, survey data starts at col[1]
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+
+    // Check col[1] (first real question) is not empty
+    if (!row[1]) {
+      Logger.log("Stopping at empty row " + (i + 1));
+      break;
+    }
+
+    var payload = {
+      "entry.303740390":  fixValue(row[1]),   // Tier-2 city?
+      "entry.1086762157": fixValue(row[2]),   // Purchase groceries online?
+      "entry.1917937891": fixValue(row[3]),   // Which city?
+      "entry.1289700543": fixValue(row[4]),   // Platform
+      "entry.1018663345": fixValue(row[5]),   // How often
+      "entry.145059431":  fixValue(row[6]),   // How long
+      "entry.1473844248": fixValue(row[7]),   // Spend per order
+      "entry.276124326":  fixValue(row[8]),   // Age Group
+      "entry.376037381":  fixValue(row[9]),   // Gender
+      "entry.997057711":  fixValue(row[10]),  // Education
+      "entry.322041317":  fixValue(row[11]),  // Income
+      "entry.713338086":  fixValue(row[12]),  // EE1
+      "entry.1492510377": fixValue(row[13]),  // EE2
+      "entry.359926672":  fixValue(row[14]),  // EE3
+      "entry.308405531":  fixValue(row[15]),  // EE4
+      "entry.1629243376": fixValue(row[16]),  // EE5
+      "entry.1939194667": fixValue(row[17]),  // EE6
+      "entry.1590118948": fixValue(row[18]),  // PE1
+      "entry.1615960163": fixValue(row[19]),  // PE2
+      "entry.507725179":  fixValue(row[20]),  // PE3
+      "entry.1416407056": fixValue(row[21]),  // PE4
+      "entry.1070295807": fixValue(row[22]),  // PE5
+      "entry.1670494399": fixValue(row[23]),  // PE6
+      "entry.1913661552": fixValue(row[24]),  // TR1
+      "entry.1005121405": fixValue(row[25]),  // TR2
+      "entry.116380034":  fixValue(row[26]),  // TR3
+      "entry.1204708854": fixValue(row[27]),  // TR4
+      "entry.857822782":  fixValue(row[28]),  // TR5
+      "entry.354813515":  fixValue(row[29]),  // TR6
+      "entry.533072747":  fixValue(row[30]),  // SI1
+      "entry.1836552272": fixValue(row[31]),  // SI2
+      "entry.428589865":  fixValue(row[32]),  // SI3
+      "entry.177603811":  fixValue(row[33]),  // SI4
+      "entry.221131318":  fixValue(row[34]),  // SI5
+      "entry.988610216":  fixValue(row[35]),  // SI6
+      "entry.709759873":  fixValue(row[36]),  // PR1
+      "entry.610247760":  fixValue(row[37]),  // PR2
+      "entry.1881353047": fixValue(row[38]),  // PR3
+      "entry.1519084617": fixValue(row[39]),  // PR4
+      "entry.514368968":  fixValue(row[40]),  // PR5
+      "entry.124654992":  fixValue(row[41]),  // PR6
+      "entry.1079926378": fixValue(row[42]),  // PV1
+      "entry.1409137915": fixValue(row[43]),  // PV2
+      "entry.174421472":  fixValue(row[44]),  // PV3
+      "entry.540895255":  fixValue(row[45]),  // PV4
+      "entry.1128443509": fixValue(row[46]),  // PV5
+      "entry.894122149":  fixValue(row[47]),  // PV6
+      "entry.1091084412": fixValue(row[48]),  // BI1
+      "entry.692321910":  fixValue(row[49]),  // BI2
+      "entry.485171893":  fixValue(row[50]),  // BI3
+      "entry.1970281100": fixValue(row[51]),  // BI4
+      "entry.446279040":  fixValue(row[52]),  // BI5
+      "entry.1388233644": fixValue(row[53])   // BI6
+    };
+
+    var submitted = submitWithRetry(payload, i + 1);
+    if (submitted) {
+      successCount++;
+    } else {
+      failedRows.push(i + 1);
+    }
+
+    Utilities.sleep(SLEEP_MS);
+  }
+
+  Logger.log("==============================");
+  Logger.log("DONE! Submitted: " + successCount + " / " + (data.length - 1) + " rows.");
+  if (failedRows.length > 0) {
+    Logger.log("FAILED rows: " + failedRows.join(", "));
+  } else {
+    Logger.log("All rows submitted successfully!");
+  }
+  Logger.log("==============================");
+}
+
+function submitWithRetry(payload, rowNum) {
+  var options = {
+    "method": "post",
+    "payload": payload,
+    "muteHttpExceptions": true
+  };
+
+  for (var attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    var response = UrlFetchApp.fetch(FORM_URL, options);
+    var code = response.getResponseCode();
+
+    if (code === 200) {
+      Logger.log("✓ Row " + rowNum + (attempt > 1 ? " (attempt " + attempt + ")" : ""));
+      return true;
+    }
+
+    Logger.log("✗ Row " + rowNum + " attempt " + attempt + ": HTTP " + code);
+    if (attempt < MAX_RETRIES) Utilities.sleep(SLEEP_MS * attempt * 2);
+  }
+
+  Logger.log("✗✗ Row " + rowNum + " PERMANENTLY FAILED.");
+  return false;
+}
+
+// Test just row 2 before full run
+function testSingleRow() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var row = data[1];
+  Logger.log("col[1] = " + fixValue(row[1]));
+  Logger.log("col[8] Age = " + fixValue(row[8]));
+  Logger.log("col[53] BI6 = " + fixValue(row[53]));
+}
